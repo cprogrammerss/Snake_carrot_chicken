@@ -2,11 +2,17 @@
 #include<time.h>
 #include<windows.h>
 #include<stdlib.h>
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+
 
 #define U 1
 #define D 2
 #define L 3 
 #define R 4       //蛇的状态，U：上 ；D：下；L:左 R：右
+
+using namespace std;
 
 typedef struct SNAKE //蛇身的一个节点
 {
@@ -22,6 +28,11 @@ snake* head, * food;//蛇头指针，食物指针
 snake* q;//遍历蛇的时候用到的指针
 int endgamestatus = 0; //游戏结束的情况，1：撞到墙；2：咬到自己；3：主动退出游戏。
 
+int id; // 用户id
+time_t timep; //当前时间 time(&timep); printf("%s",citme(&timep)); 
+clock_t start,end;
+int start_time,end_time; // 游戏开始时间与游戏结束时间 
+
 //声明全部函数//
 void Pos();
 void creatMap();
@@ -35,6 +46,7 @@ void gamecircle();
 void welcometogame();
 void endgame();
 void gamestart();
+void ShowLog();
 
 void Pos(int x, int y)//设置光标位置
 {
@@ -306,8 +318,12 @@ void pause()//暂停
 
 void gamecircle()//控制游戏        
 {
+	Pos(64, 5);
+	printf("按F5显示游戏用户日志");
+	
 
-    Pos(64, 15);
+    
+	Pos(64, 15);
     printf("不能穿墙，不能咬到自己\n");
     Pos(64, 16);
     printf("用↑.↓.←.→分别控制蛇的移动.");
@@ -372,6 +388,10 @@ void gamecircle()//控制游戏
                 }
             }
         }
+        else if(GetAsyncKeyState(VK_F5))
+        {
+        	ShowLog();
+		}
         Sleep(sleeptime);
         snakemove();
     }
@@ -379,15 +399,25 @@ void gamecircle()//控制游戏
 
 void welcometogame()//开始界面
 {
+	//游戏开始时间 
+	Pos(64,7);
+	time(&timep);
+	printf("%s",ctime(&timep));
+
+	Pos(64,8);
+	start_time = timep;
+	cout << start_time;
+	
     Pos(40, 12);
     printf("欢迎来到贪食蛇游戏！");
     Pos(40, 25);
     system("pause");
     system("cls");
     Pos(25, 12);
-    printf("用↑.↓.←.→分别控制蛇的移动， F1 为加速，2 为减速\n");
+    printf("用↑.↓.←.→分别控制蛇的移动， F1 为加速，F2 为减速\n");
     Pos(25, 13);
     printf("加速将能得到更高的分数。\n");
+    Pos(40, 25);
     system("pause");
     system("cls");
 }
@@ -411,6 +441,18 @@ void endgame()//结束游戏
     }
     Pos(24, 13);
     printf("您的得分是%d\n", score);
+    
+    //游戏结束时间
+    Pos(24, 15);
+	time(&timep);
+	printf("%s",ctime(&timep));
+	end_time = timep;
+	    Pos(24, 16);
+	cout << end_time << endl;
+    
+	Pos(24, 18);
+	cout << "游戏总时间为" << end_time-start_time << "秒" << endl;
+    
     exit(0);
 }
 
@@ -423,10 +465,32 @@ void gamestart()//游戏初始化
     createfood();
 }
 
+void ShowLog() // 按下F5显示游戏用户日志
+{
+	system("cls");
+	Pos(24,10);
+	cout << "游戏用户日志" << endl;
+	Pos(24,13);
+	cout << "开始时间" << start_time << endl; 
+	system("pause");
+	system("cls");
+ } 
+
 int main()
 {
     gamestart();
     gamecircle();
     endgame();
+    
+//	start = clock();
+//    int ans = 0;
+//    for(int i = 1; i < 1e8; i++)
+//    	ans++;
+//    end = clock();
+//    double endtime = (double)(end-start)/CLOCKS_PER_SEC;
+//    cout << "Total time:" << endtime << endl;
+    
+    
+    
     return 0;
 }
