@@ -5,7 +5,7 @@
 #include<iostream>
 #include<cstdlib>
 #include<ctime>
-
+#include <vector>
 
 #define U 1
 #define D 2
@@ -21,6 +21,15 @@ typedef struct SNAKE //蛇身的一个节点
     struct SNAKE* next;
 }snake;
 
+//游戏日志
+struct GameLog {
+	int userID;
+	string username;
+	time_t startTime;
+	int duration;
+	int score;
+}; 
+
 //全局变量//
 int score = 0, add = 10;//总得分与每次吃食物得分。
 int status, sleeptime = 200;//每次运行的时间间隔
@@ -32,6 +41,9 @@ int id; // 用户id
 time_t timep; //当前时间 time(&timep); printf("%s",citme(&timep)); 
 clock_t start,end;
 int start_time,end_time; // 游戏开始时间与游戏结束时间 
+int duration; // 游戏持续时间 
+vector<GameLog> allLogs;
+GameLog user1;
 
 //声明全部函数//
 void Pos();
@@ -46,7 +58,8 @@ void gamecircle();
 void welcometogame();
 void endgame();
 void gamestart();
-void ShowLog();
+//void ShowLog();
+void ShowUserLog();
 
 void Pos(int x, int y)//设置光标位置
 {
@@ -116,18 +129,43 @@ int biteself()//判断是否咬到了自己
     return 0;
 }
 
+//void createfood()//随机出现食物
+//{
+//    snake* food_1;
+//    srand((unsigned)time(NULL));
+//    food_1 = (snake*)malloc(sizeof(snake));
+//    while ((food_1->x % 2) != 0)    //保证其为偶数，使得食物能与蛇头对其
+//    {
+//        food_1->x = rand() % 52 + 2;
+//    }
+//    food_1->y = rand() % 24 + 1;
+//    q = head;
+//    while (q->next == NULL)
+//    {
+//        if (q->x == food_1->x && q->y == food_1->y) //判断蛇身是否与食物重合
+//        {
+//            free(food_1);
+//            createfood();
+//        }
+//        q = q->next;
+//    }
+//    Pos(food_1->x, food_1->y);
+//    food = food_1;
+//    printf("■");
+//}
+
 void createfood()//随机出现食物
 {
     snake* food_1;
     srand((unsigned)time(NULL));
     food_1 = (snake*)malloc(sizeof(snake));
-    while ((food_1->x % 2) != 0)    //保证其为偶数，使得食物能与蛇头对其
+    while ((food_1->x % 2) != 0 || food_1->x < 2 || food_1->x > 53 || food_1->y < 1 || food_1->y > 25)    
     {
         food_1->x = rand() % 52 + 2;
+        food_1->y = rand() % 24 + 1;
     }
-    food_1->y = rand() % 24 + 1;
     q = head;
-    while (q->next == NULL)
+    while (q->next != NULL)
     {
         if (q->x == food_1->x && q->y == food_1->y) //判断蛇身是否与食物重合
         {
@@ -140,6 +178,7 @@ void createfood()//随机出现食物
     food = food_1;
     printf("■");
 }
+
 
 void cantcrosswall()//不能穿墙
 {
@@ -316,29 +355,98 @@ void pause()//暂停
     }
 }
 
+int findUserIndex(const std::vector<GameLog>& logs, int userID) {
+    for (size_t i = 0; i < logs.size(); ++i) {
+        if (logs[i].userID == userID) {
+            return i;
+        }
+    }
+    return -1;
+}
+void showUserLogs(vector<GameLog>& logs){
+//	GameLog currentLog;
+//    currentLog.userID = 1; // 假设用户ID为1
+//    currentLog.username = "Alice"; // 用户名设置为"Alice"
+//    currentLog.startTime = time(nullptr); // 
+//   	currentLog.duration = end_time - start_time;
+//    currentLog.score = score;
+//    allLogs.push_back(currentLog);
+    
+	int row = 10;
+	system("cls");
+	Pos(24,3);
+	cout << "游戏用户日志" << endl;
+//	Pos(24,10);
+//	cout << "用户id: " << log.userID << endl;
+//	Pos(24,11);
+//	cout << "用户名 " << log.username << endl;
+//	Pos(24,12);
+//	cout << "游戏开始时间" << ctime(&log.startTime) << endl;
+//	Pos(24,13);
+//	cout << "游戏持续时间" << log.duration << "秒" << endl;
+//	Pos(24,14);
+//	cout << "得分:" << log.score << endl;
+//	Pos(40, 25);
+//	system("pause");
+//	system("cls");
+//	creatMap();
+	for(const auto& log : logs){
+		Pos(24, row);
+		cout << "用户id: " << log.userID << endl;
+		Pos(24, ++row);
+		cout << "用户名 " << log.username << endl;	
+		Pos(24, ++row);
+		cout << "游戏开始时间" << ctime(&log.startTime) << endl;
+		Pos(24, ++row);
+		cout << "游戏持续时间" << log.duration << "秒" << endl;
+		Pos(24, ++row);
+		cout << "得分:" << log.score << endl;
+		row += 3; 
+	}
+	Pos(40, 25);
+	system("pause");
+	system("cls");
+	creatMap();
+	createfood();
+}
 void gamecircle()//控制游戏        
 {
-	Pos(64, 5);
-	printf("按F5显示游戏用户日志");
-	
+//	Pos(64, 5);
+//	printf("按F5显示游戏用户日志");
+//	
+//
+//    
+//	Pos(64, 15);
+//    printf("不能穿墙，不能咬到自己\n");
+//    Pos(64, 16);
+//    printf("用↑.↓.←.→分别控制蛇的移动.");
+//    Pos(64, 17);
+//    printf("F1 为加速，F2 为减速\n");
+//    Pos(64, 18);
+//    printf("ESC ：退出游戏.space：暂停游戏.");
 
-    
-	Pos(64, 15);
-    printf("不能穿墙，不能咬到自己\n");
-    Pos(64, 16);
-    printf("用↑.↓.←.→分别控制蛇的移动.");
-    Pos(64, 17);
-    printf("F1 为加速，F2 为减速\n");
-    Pos(64, 18);
-    printf("ESC ：退出游戏.space：暂停游戏.");
+	
+	
+            
     Pos(64, 20);
     status = R;
     while (1)
     {
+    	Pos(64, 5);
+		printf("按F5显示游戏用户日志");
         Pos(64, 10);
         printf("得分：%d  ", score);
         Pos(64, 11);
         printf("每个食物得分：%d分", add);
+        Pos(64, 15);
+	    printf("不能穿墙，不能咬到自己\n");
+	    Pos(64, 16);
+	    printf("用↑.↓.←.→分别控制蛇的移动.");
+	    Pos(64, 17);
+	    printf("F1 为加速，F2 为减速\n");
+	    Pos(64, 18);
+	    printf("ESC ：退出游戏.space：暂停游戏.");
+	    //Pos(64, 20);
         if (GetAsyncKeyState(VK_UP) && status != D)
         {
             status = U;
@@ -390,24 +498,44 @@ void gamecircle()//控制游戏
         }
         else if(GetAsyncKeyState(VK_F5))
         {
-        	ShowLog();
+
+			int currentUserID = 1; // 假设当前用户ID为1
+            int userIndex = findUserIndex(allLogs, currentUserID);
+            if (userIndex != -1) {
+                // 更新现有日志而不是添加新日志
+                allLogs[userIndex].startTime = time(nullptr); // 记录游戏开始时间
+                // 这里添加贪吃蛇游戏持续时长和得分的更新
+                allLogs[userIndex].duration = time(nullptr) - start_time;
+                allLogs[userIndex].score = score;
+            } else {
+                GameLog currentLog;
+                currentLog.userID = currentUserID;
+                currentLog.username = "Alice"; // 用户名设置为"Alice"
+                currentLog.startTime = time(nullptr); // 记录游戏开始时间
+                // 这里添加贪吃蛇游戏持续时长和得分的记录
+                currentLog.duration = time(nullptr) - start_time;
+                currentLog.score = score;
+                allLogs.push_back(currentLog);
+            }
+            showUserLogs(allLogs);
 		}
         Sleep(sleeptime);
         snakemove();
     }
+    
 }
 
 void welcometogame()//开始界面
 {
 	//游戏开始时间 
-	Pos(64,7);
+//	Pos(40,16);
 	time(&timep);
-	printf("%s",ctime(&timep));
+//	printf("游戏开始时间为%s",ctime(&timep));
 
-	Pos(64,8);
+//	Pos(40,18);
 	start_time = timep;
-	cout << start_time;
-	
+//	cout << start_time;
+//	
     Pos(40, 12);
     printf("欢迎来到贪食蛇游戏！");
     Pos(40, 25);
@@ -421,6 +549,8 @@ void welcometogame()//开始界面
     system("pause");
     system("cls");
 }
+
+
 
 void endgame()//结束游戏
 {
@@ -443,15 +573,15 @@ void endgame()//结束游戏
     printf("您的得分是%d\n", score);
     
     //游戏结束时间
-    Pos(24, 15);
-	time(&timep);
-	printf("%s",ctime(&timep));
-	end_time = timep;
-	    Pos(24, 16);
-	cout << end_time << endl;
-    
-	Pos(24, 18);
-	cout << "游戏总时间为" << end_time-start_time << "秒" << endl;
+//    Pos(24, 15);
+//	time(&timep);
+//	printf("%s",ctime(&timep));
+//	end_time = timep;
+//	    Pos(24, 16);
+//	cout << end_time << endl;
+//    
+//	Pos(24, 18);
+//	cout << "游戏总时间为" << end_time-start_time << "秒" << endl;
     
     exit(0);
 }
@@ -465,16 +595,20 @@ void gamestart()//游戏初始化
     createfood();
 }
 
-void ShowLog() // 按下F5显示游戏用户日志
-{
-	system("cls");
-	Pos(24,10);
-	cout << "游戏用户日志" << endl;
-	Pos(24,13);
-	cout << "开始时间" << start_time << endl; 
-	system("pause");
-	system("cls");
- } 
+//void ShowLog() // 按下F5显示游戏用户日志
+//{
+//	system("cls");
+//	Pos(24,6);
+//	cout << "游戏用户日志" << endl;
+//	Pos(24,10);
+//	cout << "开始时间" << start_time << endl; 
+//	Pos(40, 25);
+//	system("pause");
+//	system("cls");
+//	creatMap();
+// } 
+ 
+
 
 int main()
 {
