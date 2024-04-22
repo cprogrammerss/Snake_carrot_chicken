@@ -7,6 +7,9 @@
 #include<ctime>
 #include <vector>
 #include<conio.h>
+#include <string.h>
+#include <fstream>
+#include <sstream>
 
 #define U 1
 #define D 2
@@ -25,7 +28,7 @@ typedef struct SNAKE //蛇身的一个节点
 //游戏日志
 struct GameLog {
 	int userID;
-	string username;
+	char username[20];
 	time_t startTime;
 	int duration;
 	int score;
@@ -54,7 +57,9 @@ time_t timep; //当前时间 time(&timep); printf("%s",citme(&timep));
 int start_time,end_time; // 游戏开始时间与游戏结束时间 
 int duration; // 游戏持续时间 
 vector<GameLog> allLogs;
-GameLog user1;
+GameLog log;
+users user;
+char login_name[20];
 
 //声明全部函数//
 void Pos();
@@ -75,6 +80,8 @@ void zhuce();
 void UpdateLogs();
 void showDetail();
 void ShowUserLog();
+void WriteUserLogToFile();
+void DisplayUserLogsFromFile();
 
 void Pos(int x, int y)//设置光标位置
 {
@@ -353,57 +360,13 @@ int findUserIndex(const std::vector<GameLog>& logs, int userID) {
     }
     return -1;
 }
-void showUserLogs(vector<GameLog>& logs){
-    
-	int row = 10;
-	system("cls");
-	Pos(24,3);
-	cout << "游戏用户日志" << endl;
-	for(const auto& log : logs){
-		Pos(24, row);
-		cout << "用户id: " << log.userID << endl;
-		Pos(24, ++row);
-		cout << "用户名 " << log.username << endl;	
-		Pos(24, ++row);
-		cout << "游戏开始时间" << ctime(&log.startTime) << endl;
-		Pos(24, ++row);
-		cout << "游戏持续时间" << log.duration << "秒" << endl;
-		Pos(24, ++row);
-		cout << "得分:" << log.score << endl;
-		row += 3; 
-	}
-	Pos(40, 25);
-	system("pause");
-	system("cls");
-	creatMap();
-	createfood();
-}
 
-void UpdateLogs(){
-	
-	
-	int currentUserID = 1; // 假设当前用户ID为1
-    int userIndex = findUserIndex(allLogs, currentUserID);
-    if (userIndex != -1) {
-        // 更新现有日志而不是添加新日志
-        allLogs[userIndex].startTime = time(nullptr); // 记录游戏开始时间
-        // 这里添加贪吃蛇游戏持续时长和得分的更新
-        allLogs[userIndex].duration = time(nullptr) - start_time;
-        allLogs[userIndex].score = score;
-    } else {
-        GameLog currentLog;
-        currentLog.userID = currentUserID;
-        currentLog.username = "Alice"; // 用户名设置为"Alice"
-        currentLog.startTime = time(nullptr); // 记录游戏开始时间
-        // 这里添加贪吃蛇游戏持续时长和得分的记录
-        currentLog.duration = time(nullptr) - start_time;
-        currentLog.score = score;
-        allLogs.push_back(currentLog);
-    }		
-}
+
 void showDetail(){
 	    Pos(64, 5);
 		printf("按F5显示游戏用户日志");
+		Pos(64, 3);
+		cout << "***" <<login_name << "正在游戏中***";
         Pos(64, 10);
         printf("得分：%d  ", score);
         Pos(64, 11);
@@ -477,9 +440,10 @@ void gamecircle()//控制游戏
         }
         else if(GetAsyncKeyState(VK_F5))
         {
-
-			UpdateLogs();
-            showUserLogs(allLogs);
+//			int startIndex = 0;
+//			UpdateLogs();
+//            showUserLogs(allLogs, startIndex);
+			DisplayUserLogsFromFile();
 		}
         Sleep(sleeptime);
         snakemove();
@@ -574,7 +538,7 @@ int denglu()//登陆界面
 	while(1)
 	{
 //		fread(&a, sizeof(users),1,fp);
-		fscanf(fp, "%s %s", a.username, a.password);
+		fscanf(fp, "%d %s %s",&a.userID, a.username, a.password);
 		
 		if(strcmp(b.username,a.username)==0)
 			break;
@@ -582,7 +546,8 @@ int denglu()//登陆界面
 		{
 			if(!feof(fp))
 			{
-				fscanf(fp, "%s %s", a.username, a.password);
+				//fscanf(fp, "%d %s %s",&a.userID, a.username, a.password);
+				continue;
 			}
 			else
 			{
@@ -601,7 +566,10 @@ int denglu()//登陆界面
 	if(strcmp(b.password,a.password)==0)
 	{
 		printf("%s，欢迎回来！！！\n",a.username);
+		strcpy(login_name, a.username);
+//		printf("%s",login_name);
 		fclose(fp);
+
 		Sleep(1000);
 		system("cls");
 		creatMap();
@@ -642,7 +610,7 @@ void zhuce()//注册模块
 		{
 			if (!feof(fp))
 			{
-			  fscanf(fp, "%s %s", b.username, b.password);
+			  fscanf(fp, "%d %s %s",&b.userID, b.username, b.password);
 			}
 			else
 			{
@@ -696,9 +664,9 @@ void zhuce()//注册模块
 		{
 			
 		    printf("\t\t请输入ID：");
-			scanf("%s",&a.userID);
+			scanf("%d",&a.userID);
 			fp = fopen("Users.txt", "a");
-			fprintf(fp, "%s %s\n",a.username,a.password); 
+			fprintf(fp, "%d %s %s\n",a.userID, a.username,a.password); 
 //			fwrite(&a,sizeof(users),1,fp);
 			printf("%s,注册成功！！！", a.username);
 			fclose(fp);
@@ -744,8 +712,102 @@ void endgame()//结束游戏
     }
     Pos(24, 13);
     printf("您的得分是%d\n", score);
+    WriteUserLogToFile();
+    
+    
     
     exit(0);
+}
+
+void ReadData(){
+	users a;
+	FILE* fp = fopen("Users.txt","r");
+	while(1)
+	{
+		fscanf(fp, "%d %s %s",&a.userID, a.username, a.password);
+		
+		if(strcmp(login_name,a.username)==0)
+			break;
+		else
+		{
+			if(!feof(fp))
+			{
+				continue;
+			}
+			else
+			{
+				fclose(fp);
+				Sleep(1000);
+				
+//				system("cls");
+//				menu();
+//				flag=0; 
+//				return flag;
+			}
+		}
+	}
+
+	
+//	fscanf(fp, "%d %s %s",&a.userID, a.username, a.password);
+	log.userID = a.userID;
+//	log.username = a.username;
+	strcpy(log.username, a.username);
+	log.startTime = start_time;
+	log.duration = time(nullptr) - start_time;
+	log.score = score;
+}
+
+void WriteUserLogToFile() {
+	
+    std::ofstream file("GameLogs.txt", std::ios_base::app); // 以追加模式打开文件
+    ReadData();
+    if (file.is_open()) {
+        file << log.userID << " " << log.username << " " << log.startTime << " " << log.duration << " " << log.score << std::endl;
+        file.close();
+    } else {
+        std::cerr << "Error opening file for writing." << std::endl;
+    }
+}
+
+void DisplayUserLogsFromFile() {
+	int row = 5;
+    system("cls");
+    Pos(24, 0);
+    cout << "游戏用户日志" << endl;
+
+
+    
+    std::ifstream file("GameLogs.txt");
+    if (!file.is_open()) {
+        std::cerr << "Error opening file for reading." << std::endl;
+        return;
+    }
+
+    GameLog log;
+    while (file >> log.userID >> log.username >> log.startTime >> log.duration >> log.score) {
+        Pos(24, row);
+		std::cout << "User ID: " << log.userID << std::endl;
+        Pos(24, ++row);
+		std::cout << "Username: " << log.username << std::endl;
+        Pos(24, ++row);
+		std::cout << "Start Time: " << ctime(&log.startTime);
+        Pos(24, ++row);
+		std::cout << "Duration: " << log.duration << " seconds" << std::endl;
+        Pos(24, ++row);
+		std::cout << "Score: " << log.score << std::endl;
+        Pos(24, ++row);
+		std::cout << "---------------------" << std::endl;
+		row += 3;
+    }
+    
+    
+    Pos(40, 25);
+    system("pause");
+    system("cls");
+    creatMap();
+    createfood();
+
+    file.close();
 }
 
 void gamestart()//游戏初始化
