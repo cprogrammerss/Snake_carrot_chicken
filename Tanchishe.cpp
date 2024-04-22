@@ -6,6 +6,7 @@
 #include<cstdlib>
 #include<ctime>
 #include <vector>
+#include<conio.h>
 
 #define U 1
 #define D 2
@@ -30,6 +31,17 @@ struct GameLog {
 	int score;
 }; 
 
+typedef struct USERS//一个玩家 
+{
+	char username[20];
+	char password[20];
+	//time_t startTime;
+	int duration;
+	int score;
+	int userID;
+
+}users;
+
 //全局变量//
 int score = 0, add = 10;//总得分与每次吃食物得分。
 int status, sleeptime = 200;//每次运行的时间间隔
@@ -39,7 +51,6 @@ int endgamestatus = 0; //游戏结束的情况，1：撞到墙；2：咬到自己；3：主动退出游戏
 
 int id; // 用户id
 time_t timep; //当前时间 time(&timep); printf("%s",citme(&timep)); 
-clock_t start,end;
 int start_time,end_time; // 游戏开始时间与游戏结束时间 
 int duration; // 游戏持续时间 
 vector<GameLog> allLogs;
@@ -58,7 +69,11 @@ void gamecircle();
 void welcometogame();
 void endgame();
 void gamestart();
-//void ShowLog();
+int menu();
+int denglu();
+void zhuce();
+void UpdateLogs();
+void showDetail();
 void ShowUserLog();
 
 void Pos(int x, int y)//设置光标位置
@@ -128,31 +143,6 @@ int biteself()//判断是否咬到了自己
     }
     return 0;
 }
-
-//void createfood()//随机出现食物
-//{
-//    snake* food_1;
-//    srand((unsigned)time(NULL));
-//    food_1 = (snake*)malloc(sizeof(snake));
-//    while ((food_1->x % 2) != 0)    //保证其为偶数，使得食物能与蛇头对其
-//    {
-//        food_1->x = rand() % 52 + 2;
-//    }
-//    food_1->y = rand() % 24 + 1;
-//    q = head;
-//    while (q->next == NULL)
-//    {
-//        if (q->x == food_1->x && q->y == food_1->y) //判断蛇身是否与食物重合
-//        {
-//            free(food_1);
-//            createfood();
-//        }
-//        q = q->next;
-//    }
-//    Pos(food_1->x, food_1->y);
-//    food = food_1;
-//    printf("■");
-//}
 
 void createfood()//随机出现食物
 {
@@ -364,32 +354,11 @@ int findUserIndex(const std::vector<GameLog>& logs, int userID) {
     return -1;
 }
 void showUserLogs(vector<GameLog>& logs){
-//	GameLog currentLog;
-//    currentLog.userID = 1; // 假设用户ID为1
-//    currentLog.username = "Alice"; // 用户名设置为"Alice"
-//    currentLog.startTime = time(nullptr); // 
-//   	currentLog.duration = end_time - start_time;
-//    currentLog.score = score;
-//    allLogs.push_back(currentLog);
     
 	int row = 10;
 	system("cls");
 	Pos(24,3);
 	cout << "游戏用户日志" << endl;
-//	Pos(24,10);
-//	cout << "用户id: " << log.userID << endl;
-//	Pos(24,11);
-//	cout << "用户名 " << log.username << endl;
-//	Pos(24,12);
-//	cout << "游戏开始时间" << ctime(&log.startTime) << endl;
-//	Pos(24,13);
-//	cout << "游戏持续时间" << log.duration << "秒" << endl;
-//	Pos(24,14);
-//	cout << "得分:" << log.score << endl;
-//	Pos(40, 25);
-//	system("pause");
-//	system("cls");
-//	creatMap();
 	for(const auto& log : logs){
 		Pos(24, row);
 		cout << "用户id: " << log.userID << endl;
@@ -409,30 +378,31 @@ void showUserLogs(vector<GameLog>& logs){
 	creatMap();
 	createfood();
 }
-void gamecircle()//控制游戏        
-{
-//	Pos(64, 5);
-//	printf("按F5显示游戏用户日志");
-//	
-//
-//    
-//	Pos(64, 15);
-//    printf("不能穿墙，不能咬到自己\n");
-//    Pos(64, 16);
-//    printf("用↑.↓.←.→分别控制蛇的移动.");
-//    Pos(64, 17);
-//    printf("F1 为加速，F2 为减速\n");
-//    Pos(64, 18);
-//    printf("ESC ：退出游戏.space：暂停游戏.");
 
+void UpdateLogs(){
 	
 	
-            
-    Pos(64, 20);
-    status = R;
-    while (1)
-    {
-    	Pos(64, 5);
+	int currentUserID = 1; // 假设当前用户ID为1
+    int userIndex = findUserIndex(allLogs, currentUserID);
+    if (userIndex != -1) {
+        // 更新现有日志而不是添加新日志
+        allLogs[userIndex].startTime = time(nullptr); // 记录游戏开始时间
+        // 这里添加贪吃蛇游戏持续时长和得分的更新
+        allLogs[userIndex].duration = time(nullptr) - start_time;
+        allLogs[userIndex].score = score;
+    } else {
+        GameLog currentLog;
+        currentLog.userID = currentUserID;
+        currentLog.username = "Alice"; // 用户名设置为"Alice"
+        currentLog.startTime = time(nullptr); // 记录游戏开始时间
+        // 这里添加贪吃蛇游戏持续时长和得分的记录
+        currentLog.duration = time(nullptr) - start_time;
+        currentLog.score = score;
+        allLogs.push_back(currentLog);
+    }		
+}
+void showDetail(){
+	    Pos(64, 5);
 		printf("按F5显示游戏用户日志");
         Pos(64, 10);
         printf("得分：%d  ", score);
@@ -446,6 +416,15 @@ void gamecircle()//控制游戏
 	    printf("F1 为加速，F2 为减速\n");
 	    Pos(64, 18);
 	    printf("ESC ：退出游戏.space：暂停游戏.");
+}
+
+void gamecircle()//控制游戏        
+{    
+    Pos(64, 20);
+    status = R;
+    while (1)
+    {
+		showDetail();
 	    //Pos(64, 20);
         if (GetAsyncKeyState(VK_UP) && status != D)
         {
@@ -499,24 +478,7 @@ void gamecircle()//控制游戏
         else if(GetAsyncKeyState(VK_F5))
         {
 
-			int currentUserID = 1; // 假设当前用户ID为1
-            int userIndex = findUserIndex(allLogs, currentUserID);
-            if (userIndex != -1) {
-                // 更新现有日志而不是添加新日志
-                allLogs[userIndex].startTime = time(nullptr); // 记录游戏开始时间
-                // 这里添加贪吃蛇游戏持续时长和得分的更新
-                allLogs[userIndex].duration = time(nullptr) - start_time;
-                allLogs[userIndex].score = score;
-            } else {
-                GameLog currentLog;
-                currentLog.userID = currentUserID;
-                currentLog.username = "Alice"; // 用户名设置为"Alice"
-                currentLog.startTime = time(nullptr); // 记录游戏开始时间
-                // 这里添加贪吃蛇游戏持续时长和得分的记录
-                currentLog.duration = time(nullptr) - start_time;
-                currentLog.score = score;
-                allLogs.push_back(currentLog);
-            }
+			UpdateLogs();
             showUserLogs(allLogs);
 		}
         Sleep(sleeptime);
@@ -527,15 +489,9 @@ void gamecircle()//控制游戏
 
 void welcometogame()//开始界面
 {
-	//游戏开始时间 
-//	Pos(40,16);
 	time(&timep);
-//	printf("游戏开始时间为%s",ctime(&timep));
-
-//	Pos(40,18);
 	start_time = timep;
-//	cout << start_time;
-//	
+
     Pos(40, 12);
     printf("欢迎来到贪食蛇游戏！");
     Pos(40, 25);
@@ -548,9 +504,226 @@ void welcometogame()//开始界面
     Pos(40, 25);
     system("pause");
     system("cls");
+    
+    int flag = menu();
+    
+    if(flag == 1);
+    {
+		creatMap();
+    	initsnake();
+    	createfood();
+    }
 }
 
+int menu()//主菜单界面 
+{
+	int select;
+	system("cls");
+	printf("\n		******************菜单栏*****************\n");
+	printf("\t\t*\t      1、登录                    *\n");
+	printf("\t\t*\t      2、注册                    *\n");
+	printf("\t\t*\t      3、退出游戏\t\t*\n");
+	printf("		*****************************************\n");
+	printf("\n");
+	printf("\t\t请输入选项：[\t]\b\b\b");
+	scanf("%d", &select);
+	int flag;
+	switch(select)
+	{
+		case 1:
+			denglu();
+			
+			break;
+		case 2:
+			zhuce();
+			menu();
+			break;
+		case 3:
+			printf("感谢使用\n");
+			exit(0);
+		default:
+			printf("输入错误!");
+			Sleep(1000);
+			system("cls");
+			menu();
+	}
+	return flag;
+} 
 
+int denglu()//登陆界面 
+{
+	system("cls");
+	users a,b;
+	FILE* fp = fopen("Users.txt","r");
+	int i,flag;//flag作为最终的结果 
+	printf("欢迎来到登陆界面！\n");
+	printf("请输入账号：\n");
+	scanf("%s",&b.username);
+	printf("请输入密码：\n");
+	for(i = 0;i < 20;i++)
+	{
+		b.password[i] = _getch();
+		if(b.password[i] == '\r')
+			break;
+		else
+			printf("*");
+	}
+	b.password[i] = '\0';
+	printf("\n");
+	
+	while(1)
+	{
+//		fread(&a, sizeof(users),1,fp);
+		fscanf(fp, "%s %s", a.username, a.password);
+		
+		if(strcmp(b.username,a.username)==0)
+			break;
+		else
+		{
+			if(!feof(fp))
+			{
+				fscanf(fp, "%s %s", a.username, a.password);
+			}
+			else
+			{
+				printf("账号或密码错误！\n");
+				fclose(fp);
+				Sleep(1000);
+				
+				system("cls");
+				menu();
+//				flag=0; 
+//				return flag;
+			}
+		}
+	}
+	
+	if(strcmp(b.password,a.password)==0)
+	{
+		printf("%s，欢迎回来！！！\n",a.username);
+		fclose(fp);
+		Sleep(1000);
+		system("cls");
+		creatMap();
+    	initsnake();
+    	createfood();
+		//flag = 1;
+		//return flag;
+	}
+	else
+	{
+		printf("密码错误！！！\n");
+		fclose(fp);
+		Sleep(1000);
+		system("cls");
+		menu();	
+//		flag = 0;
+//		return flag;
+	}
+//	printf("%d",flag);
+}
+
+void zhuce()//注册模块
+{
+	int i;
+	system("cls");
+	char c[20];
+	users a, b;
+	FILE* fp;
+	printf("\n\t\t欢迎来到注册界面！\n");
+	Sleep(500);
+	fp = fopen("Users.txt","r");
+	fscanf(fp, "%s %s", b.username, b.password);
+	printf("\n\t\t请输入用户名:[ \t\t ]\b\b\b\b\b\b\b\b\b\b\b\b\b");
+	scanf("%s",&a.username);
+	while(1)
+	{
+		if (strcmp(a.username, b.username))
+		{
+			if (!feof(fp))
+			{
+			  fscanf(fp, "%s %s", b.username, b.password);
+			}
+			else
+			{
+				break;
+			}
+		}
+		else 
+		{
+			printf("该账号已存在！！！");
+			Sleep(1000);
+			fclose(fp);
+			return;
+		}
+	}
+	int time = 2;
+	do
+	{
+		printf("\t\t请设置密码:[ \t\t ]\b\b\b\b\b\b\b\b\b\b\b\b\b");
+		i = 0;
+		for (i = 0; i < 20; i++)
+		{
+			a.password[i] = _getch();
+			if (a.password[i] == '\r')
+			{
+				break;
+			}
+			else
+			{
+				printf("*");
+			}
+		}
+		a.password[i] = '\0';
+		printf("\n");
+		printf("\t\t请确认密码：[ \t\t ]\b\b\b\b\b\b\b\b\b\b\b\b\b");
+		i = 0;
+		for (i = 0; i < 20; i++)
+		{
+			c[i] = _getch();
+			if (c[i] == '\r')
+			{
+				break;
+			}
+			else
+			{
+				printf("*");
+			}
+		}
+		c[i] = '\0';
+		printf("\n");
+		if (!strcmp( a.password,c) )
+		{
+			
+		    printf("\t\t请输入ID：");
+			scanf("%s",&a.userID);
+			fp = fopen("Users.txt", "a");
+			fprintf(fp, "%s %s\n",a.username,a.password); 
+//			fwrite(&a,sizeof(users),1,fp);
+			printf("%s,注册成功！！！", a.username);
+			fclose(fp);
+			Sleep(1500);
+			return;
+		}
+		else
+		{
+			if (time != 0)
+			{
+				printf("密码错误！\n\n请重新输入密码！！\n\n您还有%d次机会！！！", time);
+				time--;
+				continue;
+			}
+			else
+			{
+				printf("\n\t\t多次输入错误，即将退出！");
+				fclose(fp);
+				Sleep(1500);
+				return;
+			}
+		}
+	} while (time >= 0);
+	
+}
 
 void endgame()//结束游戏
 {
@@ -572,17 +745,6 @@ void endgame()//结束游戏
     Pos(24, 13);
     printf("您的得分是%d\n", score);
     
-    //游戏结束时间
-//    Pos(24, 15);
-//	time(&timep);
-//	printf("%s",ctime(&timep));
-//	end_time = timep;
-//	    Pos(24, 16);
-//	cout << end_time << endl;
-//    
-//	Pos(24, 18);
-//	cout << "游戏总时间为" << end_time-start_time << "秒" << endl;
-    
     exit(0);
 }
 
@@ -595,19 +757,6 @@ void gamestart()//游戏初始化
     createfood();
 }
 
-//void ShowLog() // 按下F5显示游戏用户日志
-//{
-//	system("cls");
-//	Pos(24,6);
-//	cout << "游戏用户日志" << endl;
-//	Pos(24,10);
-//	cout << "开始时间" << start_time << endl; 
-//	Pos(40, 25);
-//	system("pause");
-//	system("cls");
-//	creatMap();
-// } 
- 
 
 
 int main()
@@ -615,16 +764,6 @@ int main()
     gamestart();
     gamecircle();
     endgame();
-    
-//	start = clock();
-//    int ans = 0;
-//    for(int i = 1; i < 1e8; i++)
-//    	ans++;
-//    end = clock();
-//    double endtime = (double)(end-start)/CLOCKS_PER_SEC;
-//    cout << "Total time:" << endtime << endl;
-    
-    
     
     return 0;
 }
