@@ -461,9 +461,11 @@ void welcometogame()//开始界面
     Pos(40, 25);
     system("pause");
     system("cls");
-    Pos(25, 12);
-    printf("用↑.↓.←.→分别控制蛇的移动， F1 为加速，F2 为减速\n");
-    Pos(25, 13);
+    Pos(40, 12);
+    printf("用↑.↓.←.→分别控制蛇的移动\n");
+    Pos(43,13);
+    printf("F1为加速,F2为减速");
+    Pos(40, 14);
     printf("加速将能得到更高的分数。\n");
     Pos(40, 25);
     system("pause");
@@ -520,10 +522,13 @@ int denglu()//登陆界面
 	users a,b;
 	FILE* fp = fopen("Users.txt","r");
 	int i,flag;//flag作为最终的结果 
-	printf("欢迎来到登陆界面！\n");
-	printf("请输入账号：\n");
+	Pos(40,3); 
+	printf("欢迎来到登陆界面！");
+	Pos(42,6);
+	printf("请输入账号:");
 	scanf("%s",&b.username);
-	printf("请输入密码：\n");
+	Pos(42,7);
+	printf("请输入密码:");
 	for(i = 0;i < 20;i++)
 	{
 		b.password[i] = _getch();
@@ -551,7 +556,8 @@ int denglu()//登陆界面
 			}
 			else
 			{
-				printf("账号或密码错误！\n");
+				Pos(42,8);
+				printf("\033[31m账号或密码错误！\n\033[0m");
 				fclose(fp);
 				Sleep(1000);
 				
@@ -565,7 +571,8 @@ int denglu()//登陆界面
 	
 	if(strcmp(b.password,a.password)==0)
 	{
-		printf("%s，欢迎回来！！！\n",a.username);
+		Pos(42,8);
+		printf("\033[32m%s，欢迎回来！！！\n\033[0m", a.username);
 		strcpy(login_name, a.username);
 //		printf("%s",login_name);
 		fclose(fp);
@@ -580,7 +587,8 @@ int denglu()//登陆界面
 	}
 	else
 	{
-		printf("密码错误！！！\n");
+		Pos(42,8);
+		printf("\033[31m账号或密码错误！\n\033[0m");
 		fclose(fp);
 		Sleep(1000);
 		system("cls");
@@ -598,7 +606,7 @@ void zhuce()//注册模块
 	char c[20];
 	users a, b;
 	FILE* fp;
-	printf("\n\t\t欢迎来到注册界面！\n");
+	printf("\n\t\t\t欢迎来到注册界面！\n");
 	Sleep(500);
 	fp = fopen("Users.txt","r");
 	fscanf(fp, "%s %s", b.username, b.password);
@@ -677,6 +685,7 @@ void zhuce()//注册模块
 		{
 			if (time != 0)
 			{
+				system("color 04");
 				printf("密码错误！\n\n请重新输入密码！！\n\n您还有%d次机会！！！", time);
 				time--;
 				continue;
@@ -823,6 +832,7 @@ void gamestart()//游戏初始化
 
 int main()
 {
+	system("color 07");
     gamestart();
     gamecircle();
     endgame();
