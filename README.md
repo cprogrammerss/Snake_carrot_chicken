@@ -1,11 +1,11 @@
 # Snake_carrot_chicken
 > This repository is the repository for the software engineering course, and we need to build on the basic code given to refine it
 
-#####introduction
+##### introduction
 
 The purpose of this document is to explain the software analysis and design of the Snake game, and its purpose is to provide the reader with a detailed description of the game's features, interface, and implementation. This document is intended for development team members and relevant stakeholders.
 
-#####Rules of the game
+##### Rules of the game
 
 When the game starts, the snake has an initial length and grows as it eats food.
 The food is randomly generated on the map, and the snake needs to move to eat it.
@@ -13,7 +13,7 @@ Each time a food is eaten, the length of the snake increases by one section and 
 The snake will move faster and faster.
 Game end condition: The snake touches a wall or its own body.
 
-#####Architecture design
+##### Architecture design
 
 Game master module: responsible for processing user input, updating game status and interface display.
 Map module: responsible for generating maps, collision detection, etc.
@@ -21,7 +21,7 @@ Snake module: Responsible for snake movement, length increase and collision dete
 Food module: Responsible for food generation and location detection.
 Interface module: Responsible for displaying the game interface and user interaction.
 
-#####Functional design
+##### Functional design
 
 Game start function: initializes the game state and displays the start interface.
 User input function: monitor keyboard events and control the direction of snake movement.
